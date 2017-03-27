@@ -139,6 +139,9 @@ Player.prototype.createIframe_ = function(contentInfo) {
 
   var version = false;
 
+  /* use path to id */
+	contentInfo.pathid = window.location.pathname.replace('.','').replace(/\//g, '');
+
   this.absolutifyPaths_(contentInfo);
 
   var iframe = document.createElement('iframe');
@@ -250,9 +253,10 @@ Player.prototype.injectFullscreenStylesheet_ = function() {
 Player.prototype.getEmbedUrl_ = function(version) {
 	/************
    *  Assume that the script is in $ROOT/build/something.js, and that the iframe
-   *  HTML is in $ROOT/index.html.
+   *  HTML is in $ROOT/embed/index.html.
    *
-	 *  E.g: /vrview/build/vrview.min.js => /vrview/index.html.
+	 *  E.g: /build/vrview.min.js
+   *  E.g: /embed/index.html.
 	 *
    *  alternative index files are loaded with the version parameter
 	 */

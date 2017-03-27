@@ -14,7 +14,7 @@
  */
 
 var CAMEL_TO_UNDERSCORE = {
-  uuid: 'uuid',
+  pathID: 'pathid',
   video: 'video',
   image: 'image',
   preview: 'preview',
@@ -33,7 +33,9 @@ var CAMEL_TO_UNDERSCORE = {
 function SceneInfo(opt_params) {
   var params = opt_params || {};
 
-  this.image = params.image;
+	this.pathID = params.pathID;
+
+	this.image = params.image;
   this.preview = params.preview;
   this.video = params.video;
   this.defaultYaw = THREE.Math.degToRad(params.defaultYaw || 0);
@@ -44,8 +46,6 @@ function SceneInfo(opt_params) {
   this.isVROff = Util.parseBoolean(params.isVROff);
   this.isAutopanOff = Util.parseBoolean(params.isAutopanOff);
   this.loop = Util.parseBoolean(params.loop);
-
-  this.uuid = params.uuid;
 
 }
 

@@ -73,7 +73,7 @@ function onLoad() {
   var scene = SceneInfo.loadFromGetParams();
 
   connect.video = scene.video;
-  connect.uuid = scene.uuid;
+  connect.pathID = scene.pathID;
   connect.overlay.onLoad();
   connect.overlay.on('clickPlayPause', clickPlayPause);
   connect.overlay.on('scrubSetTime', onUpdateTime);

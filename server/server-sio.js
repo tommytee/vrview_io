@@ -4,14 +4,14 @@ module.exports = function (httpsServer, rData) {
 
 	io.on('connection', function (socket) {
 
-		var roomCode;
+		var roomCode, roomName;
 
 		console.log('new connection: ' + socket.id);
 
 		/* forwarding */
 		socket.on('broadcast', function(data){
 
-			socket.broadcast.volatile.to( roomCode ).emit( data.type, data.data );
+			socket.broadcast.volatile.to( roomName ).emit( data.type, data.data );
 		});
 
 		socket.on('send to', function(data){
@@ -22,17 +22,18 @@ module.exports = function (httpsServer, rData) {
 		socket.on('get code', function (data) {
 
 			roomCode = rData.randomString(4);
+			roomName = data.pathID + roomCode;
 
-			console.log('start room code: ' + roomCode);
+			console.log('start room: ' + roomName);
 
-			socket.join( roomCode );
+			socket.join( roomName );
 
-			rData.rooms[ roomCode ] = {
+			rData.rooms[ roomName ] = {
 				peers: {},
 				start: Date.now()
 			};
 
-			rData.rooms[ roomCode ].peers[ socket.id ] = data.info;
+			rData.rooms[ roomName ].peers[ socket.id ] = data.info;
 
 			socket.emit('start code', { code:roomCode });
 
@@ -40,33 +41,33 @@ module.exports = function (httpsServer, rData) {
 
 		socket.on('enter code', function (data) {
 
-			if ( rData.rooms[ data.code ] ) {
-
-				if ( rData.rooms[ data.code ].peers[ socket.id ] ) {
-
-					console.log('aPeer already in room: ' + socket.id);
-				}
+			if ( rData.rooms[ data.pathID + data.code ] ) {
 
 				roomCode = data.code;
+				roomName = data.pathID + roomCode;
 
-				socket.join( roomCode );
+				if ( rData.rooms[ roomName ].peers[ socket.id ] ) {
 
-				rData.rooms[ roomCode ].peers[ socket.id ] = data.info;
+					console.log( 'aPeer already in room: ' + socket.id );
+				}
 
-				socket.emit('code success', {
+				socket.join( roomName );
+
+				rData.rooms[ roomName ].peers[ socket.id ] = data.info;
+
+				socket.emit( 'code success', {
 					code: roomCode,
-					peers: rData.rooms[ roomCode ].peers
-				});
+					peers: rData.rooms[ roomName ].peers
+				} );
 
-				socket.broadcast.emit('peer connected', {
+				socket.broadcast.to( roomName ).emit( 'peer connected', {
 					id: socket.id,
 					info: data.info
-				});
-
+				} );
 
 			} else {
 
-				socket.emit('code fail');
+				socket.emit( 'code fail' );
 
 			}
 
@@ -74,13 +75,13 @@ module.exports = function (httpsServer, rData) {
 
 		socket.on('disconnect', function () {
 
-			if ( rData.rooms[ roomCode ] && rData.rooms[ roomCode ].peers[ socket.id ] ) {
+			if ( rData.rooms[ roomName ] && rData.rooms[ roomName ].peers[ socket.id ] ) {
 
-				delete rData.rooms[roomCode].peers[socket.id];
+				delete rData.rooms[roomName].peers[socket.id];
 
 				console.log('peer left ' + socket.id);
 
-				socket.broadcast.to(roomCode).emit('peer left', { id: socket.id });
+				socket.broadcast.to(roomName).emit('peer left', { id: socket.id });
 
 			}
 

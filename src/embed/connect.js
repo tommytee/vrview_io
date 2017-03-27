@@ -38,10 +38,6 @@ function Connect(camera) {
 		type: Util.isMobile() ? "phone" : "computer"
 	};
 
-	if ( this.myInfo_.isIOS ) {
-		this.myInfo_.iosMode = 1;
-	}
-
 	this.controls.checkForGyro((function(res){
 		this.myInfo_.hasGyro = res;
 		console.log('gyroscope found: ' + res );
@@ -104,10 +100,10 @@ Connect.prototype.startConnect = function(code) {
 		};
 
 		if ( code )
-			socket.emit('enter code', { code: code, info: this.myInfo_ });
+			socket.emit('enter code', { pathID: this.pathID, info: this.myInfo_ , code: code});
 
 		else
-			socket.emit('get code', { info: this.myInfo_ });
+			socket.emit('get code', { pathID: this.pathID, info: this.myInfo_ });
 	}
 
 	function soStartCode(data){
