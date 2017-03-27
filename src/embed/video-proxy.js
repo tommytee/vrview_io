@@ -23,7 +23,10 @@ var Util = require('../util');
  * issue. Once Safari implements some way to suppress this fullscreen player, we
  * can remove this code.
  */
-function VideoProxy(videoElement) {
+function VideoProxy(connect, videoElement) {
+
+  this.connect = connect;
+
   this.videoElement = videoElement;
   // True if we're currently manually advancing the playhead (only on iOS).
   this.isFakePlayback = false;
@@ -32,8 +35,14 @@ function VideoProxy(videoElement) {
   this.startTime = null;
 }
 
-VideoProxy.prototype.play = function() {
+VideoProxy.prototype.play = function( data, noSend ) {
+
+  if ( ! noSend ) {
+    this.connect.send('onPlay', {});
+  }
+
   if (Util.isIOS9OrLess()) {
+
     this.startTime = performance.now();
     this.isFakePlayback = true;
 
@@ -41,19 +50,28 @@ VideoProxy.prototype.play = function() {
     this.audioElement = new Audio();
     this.audioElement.src = this.videoElement.src;
     this.audioElement.play();
+
   } else {
+
     this.videoElement.play().then(function(e) {
       console.log('Playing video.', e);
     });
   }
 };
 
-VideoProxy.prototype.pause = function() {
-  if (Util.isIOS9OrLess() && this.isFakePlayback) {
-    this.isFakePlayback = true;
+VideoProxy.prototype.pause = function( data, noSend ) {
 
+  if ( ! noSend ) {
+    this.connect.send('onPause', {});
+  }
+
+  if (Util.isIOS9OrLess() && this.isFakePlayback) {
+
+    this.isFakePlayback = true;
     this.audioElement.pause();
+
   } else {
+
     this.videoElement.pause();
   }
 };
@@ -75,16 +93,27 @@ VideoProxy.prototype.setVolume = function(volumeLevel) {
 
 VideoProxy.prototype.getCurrentTime = function() {
   return {
-    currentTime:  Util.isIOS9OrLess() ? this.audioElement.currentTime : this.videoElement.currentTime,
-    duration: Util.isIOS9OrLess() ? this.audioElement.duration : this.videoElement.duration
+    currentTime: this.videoElement.currentTime,
+    duration: this.videoElement.duration
   }
 };
 
+VideoProxy.prototype.getCurrentTimeIOS9 = function() {
+  return {
+    currentTime: this.audioElement.currentTime,
+    duration: this.audioElement.duration
+  }
+};
 /**
  *
- * @param {Object} time
+ *
  */
-VideoProxy.prototype.setCurrentTime = function(time) {
+VideoProxy.prototype.setCurrentTime = function( time, noSend ) {
+
+  if ( ! noSend ) {
+    this.connect.send('onUpdateTime', time);
+  }
+
   if (this.videoElement) {
     this.videoElement.currentTime = time.currentTime;
   }

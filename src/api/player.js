@@ -80,10 +80,6 @@ Player.prototype.addHotspot = function(hotspotId, params) {
   this.sender.send({type: Message.ADD_HOTSPOT, data: data});
 };
 
-/**
- * HTML5 API
- */
-
 Player.prototype.play = function() {
   this.sender.send({type: Message.PLAY});
 };
@@ -92,11 +88,8 @@ Player.prototype.pause = function() {
   this.sender.send({type: Message.PAUSE});
 };
 
-/**
- * Equivalent of HTML5 setSrc()
- * @param {String} contentInfo
- */
 Player.prototype.setContent = function(contentInfo) {
+
   this.absolutifyPaths_(contentInfo);
   var data = {
     contentInfo: contentInfo
@@ -115,7 +108,7 @@ Player.prototype.setVolume = function(volumeLevel) {
 };
 
 Player.prototype.getVolume = function() {
-	return this.volume_;
+  return this.volume_;
 };
 
 /**
@@ -143,6 +136,9 @@ Player.prototype.getDuration = function() {
  * @return {IFrameElement} The iframe.
  */
 Player.prototype.createIframe_ = function(contentInfo) {
+
+  var version = false;
+
   this.absolutifyPaths_(contentInfo);
 
   var iframe = document.createElement('iframe');
@@ -159,9 +155,12 @@ Player.prototype.createIframe_ = function(contentInfo) {
     iframe.setAttribute('height', contentInfo.height);
     delete contentInfo.height;
   }
+	if (contentInfo.hasOwnProperty('version')) {
+		version = contentInfo.version;
+		delete contentInfo.version;
+	}
 
-  var url = this.getEmbedUrl_() + Util.createGetParams(contentInfo);
-  iframe.src = url;
+  iframe.src = this.getEmbedUrl_(version) + Util.createGetParams(contentInfo);
 
   return iframe;
 };
@@ -195,13 +194,12 @@ Player.prototype.onMessage_ = function(event) {
       this.emit('timeupdate', data);
       break;
     case 'play':
-    case 'paused':
-      this.isPaused = data;
-      if (this.isPaused) {
-        this.emit('pause', data);
-      } else {
-        this.emit('play', data);
-      }
+      this.isPaused = false;
+      this.emit('play');
+      break;
+    case 'pause':
+      this.isPaused = true;
+      this.emit('pause');
       break;
     case 'enter-fullscreen':
     case 'enter-vr':
@@ -249,16 +247,21 @@ Player.prototype.injectFullscreenStylesheet_ = function() {
   document.body.appendChild(style);
 };
 
-Player.prototype.getEmbedUrl_ = function() {
-  // Assume that the script is in $ROOT/build/something.js, and that the iframe
-  // HTML is in $ROOT/index.html.
-  //
-  // E.g: /vrview/2.0/build/vrview.min.js => /vrview/2.0/index.html.
+Player.prototype.getEmbedUrl_ = function(version) {
+	/************
+   *  Assume that the script is in $ROOT/build/something.js, and that the iframe
+   *  HTML is in $ROOT/index.html.
+   *
+	 *  E.g: /vrview/build/vrview.min.js => /vrview/index.html.
+	 *
+   *  alternative index files are loaded with the version parameter
+	 */
   var path = CURRENT_SCRIPT_SRC;
   var split = path.split('/');
   var rootSplit = split.slice(0, split.length - 2);
   var rootPath = rootSplit.join('/');
-  return rootPath + '/index.html';
+
+  return rootPath + (version ? '/embed/index-'+ version +'.html' : '/embed/index.html');
 };
 
 Player.prototype.getDirName_ = function() {

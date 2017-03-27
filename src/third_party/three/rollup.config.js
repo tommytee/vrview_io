@@ -24,7 +24,7 @@ function glsl () {
 
 export default {
 	entry: 'src/third_party/three/Three.js',
-	dest: 'build/three.js',
+	dest: 'public/build/three.js',
 	moduleName: 'THREE',
 	format: 'umd',
 	plugins: [

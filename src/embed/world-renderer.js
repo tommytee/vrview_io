@@ -40,31 +40,32 @@ var AUTOPAN_ANGLE = 0.4;
  *   error: if there is an error loading the scene.
  *   modechange(Boolean isVR): if the mode (eg. VR, fullscreen, etc) changes.
  */
-function WorldRenderer() {
-  this.init_();
+function WorldRenderer(connect, camera) {
 
-  this.sphereRenderer = new SphereRenderer(this.scene);
-  this.hotspotRenderer = new HotspotRenderer(this);
-  this.hotspotRenderer.on('focus', this.onHotspotFocus_.bind(this));
-  this.hotspotRenderer.on('blur', this.onHotspotBlur_.bind(this));
-  this.reticleRenderer = new ReticleRenderer(this.camera);
+	this.connect = connect;
+	this.camera = camera;
+	this.init_();
 
-  // Get the VR Display as soon as we initialize.
-  navigator.getVRDisplays().then(function(displays) {
-    if (displays.length > 0) {
-      this.vrDisplay = displays[0];
-    }
-  }.bind(this));
+	this.sphereRenderer = new SphereRenderer( this.scene );
+	this.hotspotRenderer = new HotspotRenderer( this );
+	this.hotspotRenderer.on( 'focus', this.onHotspotFocus_.bind( this ) );
+	this.hotspotRenderer.on( 'blur', this.onHotspotBlur_.bind( this ) );
+	this.reticleRenderer = new ReticleRenderer( this.camera );
+
+	// Get the VR Display as soon as we initialize.
+	navigator.getVRDisplays().then( function ( displays ) {
+		if ( displays.length > 0 ) {
+			this.vrDisplay = displays[ 0 ];
+		}
+	}.bind( this ) );
 
 }
 WorldRenderer.prototype = new EventEmitter();
 
 WorldRenderer.prototype.render = function(time) {
-  this.controls.update();
   this.hotspotRenderer.update(this.camera);
   TWEEN.update(time);
   this.effect.render(this.scene, this.camera);
-  this.emit('timeupdate', this.videoProxy.getCurrentTime());
 };
 
 /**
@@ -149,7 +150,7 @@ WorldRenderer.prototype.setScene = function(scene) {
       });
       this.player.load(scene.video);
 
-      this.videoProxy = new VideoProxy(this.player.video);
+      this.videoProxy = new VideoProxy(this.connect, this.player.video);
     }
   }
 
@@ -177,7 +178,7 @@ WorldRenderer.prototype.destroy = function() {
     this.player.destroy();
     this.player = null;
   }
-}
+};
 
 WorldRenderer.prototype.didLoad_ = function(opt_event) {
   var event = opt_event || {};
@@ -218,12 +219,11 @@ WorldRenderer.prototype.autopan = function(duration) {
 
 WorldRenderer.prototype.init_ = function() {
   var container = document.querySelector('body');
-  var aspect = window.innerWidth / window.innerHeight;
-  var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
-  camera.layers.enable(1);
+
+  this.camera.layers.enable(1);
 
   var cameraDummy = new THREE.Object3D();
-  cameraDummy.add(camera);
+  cameraDummy.add(this.camera);
 
   // Antialiasing disabled to improve performance.
   var renderer = new THREE.WebGLRenderer({antialias: false});
@@ -233,7 +233,6 @@ WorldRenderer.prototype.init_ = function() {
 
   container.appendChild(renderer.domElement);
 
-  var controls = new THREE.VRControls(camera);
   var effect = new THREE.VREffect(renderer);
 
   // Disable eye separation.
@@ -244,10 +243,8 @@ WorldRenderer.prototype.init_ = function() {
   // submitFrame().
   effect.autoSubmitFrame = false;
 
-  this.camera = camera;
   this.renderer = renderer;
   this.effect = effect;
-  this.controls = controls;
   this.manager = new WebVRManager(renderer, effect, {predistorted: false});
 
   this.scene = this.createScene_();

@@ -235,7 +235,18 @@ Util.getCurrentScript = function() {
     console.warn('This browser does not support document.currentScript. Trying fallback.');
   }
   return document.currentScript || document.scripts[document.scripts.length - 1];
-}
+};
 
+Util.isFirefox = function() {
+    return /firefox/i.test(navigator.userAgent);
+};
+
+Util.randomString = function(m) {
+    var s = '', m = m || 5;
+    var r = 'abcdefghjkmnpqrstuvwxyz23456789'; // 31^5 = 28,629,151
+    for (var i = 0; i < m; i++)
+        s += r.charAt(Math.floor(Math.random()*r.length));
+    return s;
+};
 
 module.exports = Util;

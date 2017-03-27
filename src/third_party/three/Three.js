@@ -24,5 +24,4 @@ export { CircleGeometry } from '../../../node_modules/three/src/geometries/Circl
 export { RingGeometry } from '../../../node_modules/three/src/geometries/RingGeometry.js';
 export * from '../../../node_modules/three/src/constants.js';
 
-import '../../../node_modules/three/examples/js/controls/VRControls.js';
 import '../../../node_modules/three/examples/js/effects/VREffect.js';

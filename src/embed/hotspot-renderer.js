@@ -89,15 +89,14 @@ HotspotRenderer.prototype = new EventEmitter();
  * @param radius {Number} The radius of the hotspot, specified in meters.
  * @param distance {Number} The distance of the hotspot from camera, specified
  * in meters.
- * @param hotspotId {String} The ID of the hotspot.
+ * @param id {String} The ID of the hotspot.
  */
 HotspotRenderer.prototype.add = function(pitch, yaw, radius, distance, id) {
-  // If a hotspot already exists with this ID, stop.
+
   if (this.hotspots[id]) {
-    // TODO: Proper error reporting.
-    console.error('Attempt to add hotspot with existing id %s.', id);
-    return;
+    console.log('--> ERROR: hotspot repeat ');
   }
+
   var hotspot = this.createHotspot_(radius, distance);
   hotspot.name = id;
 
@@ -109,12 +108,12 @@ HotspotRenderer.prototype.add = function(pitch, yaw, radius, distance, id) {
   
   this.hotspotRoot.add(hotspot);
   this.hotspots[id] = hotspot;
-}
+};
 
 /**
  * Removes a hotspot based on the ID.
  *
- * @param ID {String} Identifier of the hotspot to be removed.
+ * @param id {String} Identifier of the hotspot to be removed.
  */
 HotspotRenderer.prototype.remove = function(id) {
   // If there's no hotspot with this ID, fail.
@@ -137,6 +136,7 @@ HotspotRenderer.prototype.remove = function(id) {
  * Clears all hotspots from the pano. Often called when changing panos.
  */
 HotspotRenderer.prototype.clearAll = function() {
+
   for (var id in this.hotspots) {
     this.remove(id);
   }
@@ -254,15 +254,18 @@ HotspotRenderer.prototype.onMouseMove_ = function(e) {
 HotspotRenderer.prototype.onMouseUp_ = function(e) {
   this.updateMouse_(e);
 
-  // If no hotspots are pressed, emit an empty click event.
+  // If no hotspots are pressed, emit an empty click event. (is this necessary?)
   if (Util.isEmptyObject(this.downHotspots)) {
-    this.emit('click');
+		//this.emit('click');
     return;
   }
 
   // Only emit a click if the mouse was down on the same hotspot before.
   for (var id in this.selectedHotspots) {
     if (id in this.downHotspots) {
+
+      console.log('clicked: ' + id);
+
       this.emit('click', id);
       this.up_(id);
     }

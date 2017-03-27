@@ -14,6 +14,7 @@
  */
 
 var CAMEL_TO_UNDERSCORE = {
+  uuid: 'uuid',
   video: 'video',
   image: 'image',
   preview: 'preview',
@@ -43,12 +44,16 @@ function SceneInfo(opt_params) {
   this.isVROff = Util.parseBoolean(params.isVROff);
   this.isAutopanOff = Util.parseBoolean(params.isAutopanOff);
   this.loop = Util.parseBoolean(params.loop);
+
+  this.uuid = params.uuid;
+
 }
 
 SceneInfo.loadFromGetParams = function() {
   var params = {};
   for (var camelCase in CAMEL_TO_UNDERSCORE) {
     var underscore = CAMEL_TO_UNDERSCORE[camelCase];
+
     params[camelCase] = Util.getQueryParameter(underscore);
   }
   var scene = new SceneInfo(params);

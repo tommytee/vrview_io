@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>VR view</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div id="error" class="dialog">
+    <div class="wrap">
+        <h1 class="title">Error</h1>
+        <p class="message">An unknown error occurred.</p>
+    </div>
+</div>
+
+<div id="tool-overlay">
+    <div id="connect-icon"></div>
+    <div id="play-pause-button"></div>
+    <div id="play-time">00:00 | 00:00</div>
+    <div id="scrubber-outer">
+        <div id="scrubber-inner"></div>
+    </div>
+    <span id="span-a">
+        <span id="span-b"></span>
+        <span id="span-c"></span>
+    </span>
+</div>
+<div id="code-overlay"></div>
+<div id="connect-mask">
+    <div id="connect-x"> X </div>
+    <div id="connect-area">
+        <div id="start-page" class="page">
+            <div id="get-code-div" class="button-div">get code</div>
+            <div id="enter-code-div" class="button-div">enter code</div>
+        </div>
+        <div id="enter-code-page" class="page">
+            <div id="code-input-wrap">
+                <input id="code-input" type="text"/>
+                <span id="code-input-x"> X </span>
+            </div>
+        </div>
+        <div id="connections-page" class="page">
+            <div id="code-title">
+                connect code: <span id="color-code"></span>
+            </div>
+            <div id="exit-button">exit</div>
+        </div>
+    </div>
+</div>
+
+<div id="play-overlay">
+    <img src="images/ic_play_arrow_white_24dp.svg"/>
+</div>
+
+<a id="watermark" href="http://g.co/vr/view" target="_blank">
+    <img src="images/ic_info_outline_black_24dp.svg"/>
+</a>
+
+<script>
+	WebVRConfig = {
+		BUFFER_SCALE: 0.5,
+		TOUCH_PANNER_DISABLED: false
+	};
+</script>
+
+<script src="/build/three.js"></script>
+<script src="/build/embed.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

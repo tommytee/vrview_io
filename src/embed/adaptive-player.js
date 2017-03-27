@@ -98,6 +98,7 @@ AdaptivePlayer.prototype.onError_ = function(e) {
 
 AdaptivePlayer.prototype.loadVideo_ = function(url) {
   var self = this, video = self.video;
+  //var video = this.video;
   return new Promise(function(resolve, reject) {
     video.src = url;
     video.addEventListener('canplaythrough', resolve);
