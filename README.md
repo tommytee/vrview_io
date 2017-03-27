@@ -1,11 +1,15 @@
-This fork of VR View has many changes
-================
-Embed is served from /embed instead of /  <br />
+This fork
+==========
+This fork of VR View has many changes.
+
+Embed is served from /embed instead of / <br />
 Video has loop option and time. (ron666) <br />
 Video has scrubber/slider. <br />
 Users can connect views. <br />
 
 uses express and socket.io
+
+<https://vrview.io/examples>
 
 VR View
 =======

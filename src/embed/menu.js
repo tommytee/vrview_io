@@ -148,7 +148,8 @@ Menu.prototype.getNodes = function(){
   this.colorCode = document.getElementById('color-code');
   this.exitButton = document.getElementById('exit-button');
 
-  this.getCodeDiv.addEventListener('click', this.clickGetCode.bind(this), false);
+	this.connectX.addEventListener('click', this.toggle.bind(this, true, false), false);
+	this.getCodeDiv.addEventListener('click', this.clickGetCode.bind(this), false);
   this.enterCodeDiv.addEventListener('click',this.clickEnterCode.bind(this),false);
   this.codeInput.onkeydown = this.codeKeyDown.bind(this);
   this.codeInputX.addEventListener('click', this.gotoStartPage.bind(this), false);

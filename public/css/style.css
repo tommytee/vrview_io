@@ -4,7 +4,16 @@ body {
 }
 
 a {
-  color: #00B7FF;
+  color: #c00;
+}
+.links a {
+  background-color: #ddd;
+  padding: 7px 15px;
+  color: #d00;
+  margin: 13px;
+  display: inline-block;
+  text-decoration: none;
+  font-size: 15px;
 }
 #bottom {
   position: absolute;
