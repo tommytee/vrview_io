@@ -19,8 +19,8 @@ if ( process.argv[2] === 'vrview') {
 } else {
 
 	options = {
-		key: fs.readFileSync('../key.pem'),
-		cert: fs.readFileSync('../cert.pem')
+		key: fs.readFileSync( '../key.pem' ),
+		cert: fs.readFileSync( '../cert.pem' )
 	};
 }
 

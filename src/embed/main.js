@@ -98,43 +98,44 @@ function onLoad() {
 
 function onRenderLoad(event) {
 
-  if (event.videoElement) {
+	if ( event.videoElement ) {
 
-    // On mobile, tell the user they need to tap to start. Otherwise, autoplay.
-    if (Util.isMobile()) {
+		// On mobile, tell the user they need to tap to start. Otherwise, autoplay.
+		if ( Util.isMobile() ) {
 
-      showPlayButton();
-      document.body.addEventListener('touchend', tapVideo);
+			showPlayButton();
+			document.body.addEventListener( 'touchend', tapVideo );
 
-    } else {
+		} else {
 
-      event.videoElement.play();
-    }
+			event.videoElement.play();
+		}
 
-    // Attach to pause and play events, to notify the API.
-    event.videoElement.addEventListener('pause', videoPause);
-    event.videoElement.addEventListener('play', videoPlay);
-    event.videoElement.addEventListener('timeupdate', updateVideoTimer);
-    event.videoElement.addEventListener('ended', sendToPlayer.onEnded);
+		// Attach to pause and play events, to notify the API.
+		event.videoElement.addEventListener( 'pause', videoPause );
+		event.videoElement.addEventListener( 'play', videoPlay );
+		event.videoElement.addEventListener( 'timeupdate', updateVideoTimer );
+		event.videoElement.addEventListener( 'ended', sendToPlayer.onEnded );
 
-  }
+	}
 
-  // Hide loading indicator.
-  loadIndicator.hide();
+	// Hide loading indicator.
+	loadIndicator.hide();
 
-  // Autopan only on desktop, for photos only, and only if autopan is enabled.
-  if (!Util.isMobile() && !worldRenderer.sceneInfo.video &&
-      !worldRenderer.sceneInfo.isAutopanOff) {
-    worldRenderer.autopan();
-  }
+	// Autopan only on desktop, for photos only, and only if autopan is enabled.
+	if ( ! Util.isMobile() &&
+    ! worldRenderer.sceneInfo.video &&
+		! worldRenderer.sceneInfo.isAutopanOff ) {
+		worldRenderer.autopan();
+	}
 
-  // Notify the API that we are ready, but only do this once.
-  if (!isReadySent) {
+	// Notify the API that we are ready, but only do this once.
+	if ( !isReadySent ) {
 
-    isReadySent = true;
+		isReadySent = true;
 
-    sendToPlayer.ready(connect.video ? event.videoElement.duration : null);
-  }
+		sendToPlayer.ready( connect.video ? event.videoElement.duration : null );
+	}
 }
 
 

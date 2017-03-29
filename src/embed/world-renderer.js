@@ -210,11 +210,13 @@ WorldRenderer.prototype.setDefaultYaw_ = function(angleRad) {
  * there is live content there (on desktop only).
  */
 WorldRenderer.prototype.autopan = function(duration) {
-  var targetY = this.camera.parent.rotation.y - AUTOPAN_ANGLE;
-  var tween = new TWEEN.Tween(this.camera.parent.rotation)
-      .to({y: targetY}, AUTOPAN_DURATION)
-      .easing(TWEEN.Easing.Quadratic.Out)
-      .start();
+
+	var targetY = this.camera.parent.rotation.y - AUTOPAN_ANGLE;
+
+	var tween = new TWEEN.Tween( this.camera.parent.rotation )
+		.to( { y: targetY }, AUTOPAN_DURATION )
+		.easing( TWEEN.Easing.Quadratic.Out )
+		.start();
 };
 
 WorldRenderer.prototype.init_ = function() {
