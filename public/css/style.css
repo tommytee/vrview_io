@@ -7,8 +7,8 @@ a {
   color: #c00;
 }
 .links a {
-  background-color: #f5f5f5;
-  padding: 10px 20px;
+  padding: 6px 22px;
+  border: 1px solid #000;
   color: #d00;
   margin: 13px;
   display: inline-block;

@@ -15,7 +15,7 @@ Overlay.prototype.showing = false;
 Overlay.prototype.onLoad = function () {
 
 	window.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-	//window.addEventListener('touchstart', onMouseMove, false );
+	window.addEventListener('touchmove', this.onMouseMove.bind(this), false);
 
 	/* trigger toolbar hide if mouse exits iframe from toolbar */
 	document.body.addEventListener('mouseout', (function(e) {
@@ -144,15 +144,15 @@ Overlay.prototype.scrubSetTime = function(e){
 
 Overlay.prototype.clickPlayPause = function() {
 
-  this.emit('clickPlayPause');
+	this.emit( 'clickPlayPause' );
 
 };
 
 Overlay.prototype.updatePlayPauseIcon = function(isPaused) {
 
-  this.isPaused = isPaused;
+	this.isPaused = isPaused;
 
-  if ( this.isPaused ) {
+	if ( this.isPaused ) {
 
 		this.playPauseButton.innerHTML = this.ICONS.play;
 
@@ -160,44 +160,46 @@ Overlay.prototype.updatePlayPauseIcon = function(isPaused) {
 
 		this.playPauseButton.innerHTML = this.ICONS.pause;
 
-  }
+	}
 
 };
 
 Overlay.prototype.onMouseMove = function(e) {
 
-	this.connect.controls.sendingMouse = { x:e.clientX, y:e.clientY };
 
-  if ( this.connect.controls.dragging ) {
+	this.connect.controls.sendingMouse = { x: e.pageX, y: e.pageY };
 
-	  if ( this.toolOverlay.style.opacity == 1 ) {
+	if ( this.connect.controls.dragging ) {
 
-			clearTimeout(window.timer);
-			clearTimeout(window.timer2);
+		if ( this.toolOverlay.style.opacity == 1 ) {
 
-		  this.hideToolbar_();
+			clearTimeout( window.timer );
+			clearTimeout( window.timer2 );
 
-	  }
-
-  } else {
-
-	  if ( this.toolOverlay.style.opacity == 0 ) {
-
-		  this.toolOverlay.style.zIndex = 44;
-		  this.toolOverlay.style.opacity = 1
-
-	  }
-
-		clearTimeout(window.timer);
-		clearTimeout(window.timer2);
-
-		if ( window.innerHeight - e.clientY > 31 ) {
-
-			window.timer = setTimeout(this.hideToolbar_.bind(this), 3000);
+			this.hideToolbar_();
 
 		}
 
-  }
+	} else {
+
+		if ( this.toolOverlay.style.opacity == 0 ) {
+
+			this.toolOverlay.style.zIndex = 44;
+			this.toolOverlay.style.opacity = 1
+
+		}
+
+		clearTimeout( window.timer );
+		clearTimeout( window.timer2 );
+
+		/* if no mouse or mouse is not over toolbar hide */
+		if ( ! e.clientY || window.innerHeight - e.clientY > 31 ) {
+
+			window.timer = setTimeout( this.hideToolbar_.bind( this ), 3000 );
+
+		}
+
+	}
 
 };
 
