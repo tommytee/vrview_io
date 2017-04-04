@@ -5,7 +5,7 @@ This fork of VR View has many changes.
 Embed is served from /embed instead of / <br />
 Video has loop option and time. (ron666) <br />
 Video has scrubber/slider. <br />
-Users can connect views. <br />
+Users can connect views by getting a code and entering it into another device / browser / tab<br />
 
 uses express and socket.io
 
