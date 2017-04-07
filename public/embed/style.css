@@ -225,7 +225,7 @@ canvas:active {
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
   color: rgb(3,185,20);
-  background-color: rgba(5,0,5,.3);
+  background-color: rgba(5,0,5,.6);
   display: none;
   z-index: 34;
 }

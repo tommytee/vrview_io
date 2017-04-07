@@ -1,24 +1,10 @@
-/*
- * connect.js
- * Copyright 2017 tfs All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 var Util = require('../util');
 var Emitter = require('eventemitter3');
 var Overlay = require('./overlay');
 var Menu = require('./menu');
-var socket;
+var Socketiop2p = require('socket.io-p2p')
+var io = require('socket.io-client')
+var socket, p2pSocket;
 
 function Connect(camera) {
 
@@ -70,165 +56,175 @@ Connect.prototype.update = function() {
 
 Connect.prototype.startConnect = function(code) {
 
-	if ( this.started_ )
-		return;
+  if (this.started_)
+    return;
 
-	this.started_ = true;
+  this.started_ = true;
 
-	socket = io();
-	socket.on( 'connect', soConnect.bind( this ) );
-	socket.on( 'start code', soStartCode.bind( this ) );
-	socket.on( 'code success', soCodeSuccess.bind( this ) );
-	socket.on( 'code fail', soCodeFail.bind( this ) );
-	socket.on( 'peer connected', soPeerConnected.bind( this ) );
-	socket.on( 'starterInfo', soStarterInfo.bind( this ) );
-	socket.on( 'onUpdateTime', this.onUpdateTime.bind( this ) );
-	socket.on( 'onPlay', this.onPlay.bind( this ) );
-	socket.on( 'onPause', this.onPause.bind( this ) );
-	socket.on( 'onAddHotspot', this.onAddHotspot.bind( this ) );
-	socket.on( 'onSetContent', this.onSetContent.bind( this ) );
-	socket.on( 'onSetView', this.onSetView.bind( this ) );
+  var opts = { peerOpts: { trickle: true }, autoUpgrade: true }
 
-	function soConnect(){
+  socket = io()
+  socket.on( 'connect', soConnect.bind( this ) );
 
-		this.id_ = socket.id;
+  p2pSocket = new Socketiop2p( socket, opts, function () { console.log( '- - - > p2p started' )})
+  p2pSocket.on( 'start code', soStartCode.bind( this ) );
+  p2pSocket.on( 'code success', soCodeSuccess.bind( this ) );
+  p2pSocket.on( 'code fail', soCodeFail.bind( this ) );
+  p2pSocket.on( 'peer connected', soPeerConnected.bind( this ) );
+  p2pSocket.on( 'starterInfo', soStarterInfo.bind( this ) );
+  p2pSocket.on( 'onUpdateTime', this.onUpdateTime.bind( this ) );
+  p2pSocket.on( 'onPlay', this.onPlay.bind( this ) );
+  p2pSocket.on( 'onPause', this.onPause.bind( this ) );
+  p2pSocket.on( 'onAddHotspot', this.onAddHotspot.bind( this ) );
+  p2pSocket.on( 'onSetContent', this.onSetContent.bind( this ) );
+  p2pSocket.on( 'onSetView', this.onSetView.bind( this ) );
+  p2pSocket.on( 'peer-disconnect', (function ( id ) {
+    this.menu.removeDevice(id);
+  }).bind( this ) );
 
-		this.send = function (type, data) {
+  function soConnect () {
 
-				data.sender = socket.id;
-				socket.emit( 'broadcast', { type: type, data: data } );
-		};
+    this.send = function (type, data) {
 
-		if ( code )
-			socket.emit('enter code', { pathID: this.pathID, info: this.myInfo_ , code: code});
+      data.sender = this.id_;
 
-		else
-			socket.emit('get code', { pathID: this.pathID, info: this.myInfo_ });
-	}
+      p2pSocket.emit(type, data);
 
-	function soStartCode(data){
+    };
 
-		this.code_ = data.code;
-		this.menu.showConnectionsPage();
+    if (code)
+      socket.emit('enter code', {pathID: this.pathID, info: this.myInfo_, code: code});
 
-		console.log('My id is ' + this.id_ );
-	}
+    else
+      socket.emit('get code', {pathID: this.pathID, info: this.myInfo_});
+  }
 
-	function soCodeSuccess(data) {
-		
-		this.code_ = data.code;
-		this.peers = data.peers;
-		this.menu.showConnectionsPage();
+  function soStartCode (data) {
 
-		console.log('My id is ' + this.id_ );
-	}
+    this.id_ = socket.id;
+    this.code_ = data.code;
+    this.menu.showConnectionsPage();
 
-	function soCodeFail() {
+    console.log('My id is ' + this.id_);
 
-		console.log('code fail');
-		this.menu.codeFail();
-	}
+  }
 
-	function soPeerConnected(data) {
+  function soCodeSuccess (data) {
 
-		console.log('device connected', data.id);
+    this.id_ = socket.id;
+    this.code_ = data.code;
+    this.peers = data.peers;
+    this.menu.showConnectionsPage();
 
-		this.controls.sending = ! this.myInfo_.isMobile;
-		this.receivingView = ! this.myInfo_.isMobile;
+    console.log('My id is ' + this.id_);
 
-		var id = data.id;
+  }
 
-		if ( this.peers[id] ) {
+  function soCodeFail () {
 
-			console.log('Error: Peer already connected')
+    console.log('code fail');
+    this.menu.codeFail();
+  }
 
-		} else {
+  function soPeerConnected (data) {
 
-			this.peers[ id ] = {
-				status: "connected",
-				info: data.info
-			};
+    console.log('peer connected', data.id);
 
-			this.menu.addDevice(id);
+    this.controls.sending = ! this.myInfo_.isMobile;
+    this.receivingView = true;
 
-			var startMsg = {
-				id: this.id_,
-				info: this.myInfo_,
-				content: this.content,
-				orientation: this.controls.curOri,
-				hotspotsData: this.hotspotsData
-			};
+    var id = data.id;
 
-			if ( this.video ) {
-				startMsg.video = this.currTim;
-			}
+    if (this.peers[id]) {
 
-			socket.emit( 'send to', { id:id, type:'starterInfo', data:startMsg } );
+      console.log('Error: Peer already connected')
 
-		}
-	}
+    } else {
 
-	function soStarterInfo(data) {
+      this.peers[ id ] = {
+        status: "connected",
+        info: data.info
+      };
+      
+      this.menu.addDevice(id);
 
-		var id = data.id;
+      var startMsg = {
+        id: this.id_,
+        info: this.myInfo_,
+        content: this.content,
+        orientation: this.controls.curOri,
+        hotspotsData: this.hotspotsData
+      };
 
-		if ( this.peers[id].status === 'connected' ) {
+      if (this.video) {
+        startMsg.video = this.currTim;
+      }
 
-			console.log('Error: Peer already connected')
+      socket.emit('send to', {id: id, type: 'starterInfo', data: startMsg});
 
-		} else {
+    }
+  }
 
-			this.peers[id].info = data.info;
-			this.peers[id].status = 'connected';
+  function soStarterInfo (data) {
 
-			this.menu.addDevice(id);
+    var id = data.id;
 
-			if ( this.lookingForContent_ ) {
+    if (this.peers[id].status === 'connected') {
 
-				this.lookingForContent_ = false;
-				this.menu.toggle( true, this.menu.showConnectionsPage.bind( this.menu ) );
+      console.log('Error: Peer already connected')
 
-				this.controls.incoming = data.orientation;
+    } else {
 
-				if ( data.video ) {
+      this.peers[id].info = data.info;
+      this.peers[id].status = 'connected';
 
-					this.emit( 'onUpdateTime', data.video, true );
+      this.menu.addDevice(id);
 
-				} else {
+      if (this.lookingForContent_) {
 
-					this.emit( 'onSetContent', data.content, true, true );
+        this.lookingForContent_ = false;
+        this.menu.toggle(true, this.menu.showConnectionsPage.bind(this.menu));
 
-					for ( var i = 0; i < data.hotspotsData.length; i++ )
-						this.emit( 'onAddHotspot', data.hotspotsData[ i ], true );
+        this.controls.incoming = data.orientation;
 
-				}
-			}
+        if (data.video) {
 
-			setTimeout((function () {
+          this.emit('onUpdateTime', data.video, true);
 
-				if ( this.myInfo_.isMobile ) {
+        } else {
 
-					this.controls.sending = false;
-					this.receivingView = true;
-					this.mobileReceiveMode = true;
+          this.emit('onSetContent', data.content, true, true);
 
-				} else {
+          for (var i = 0; i < data.hotspotsData.length; i++)
+            this.emit('onAddHotspot', data.hotspotsData[i], true);
 
-					this.controls.sending = true;
-					this.receivingView = true;
-				}
+        }
+      }
 
-				//console.log('connected to ' + id);
+      setTimeout((function () {
 
-			}).bind(this), (this.recentlyEntered_ ? 200 : 0));
+        if (this.myInfo_.isMobile) {
 
-		}
+          this.controls.sending = false;
+          this.receivingView = true;
+          this.mobileReceiveMode = true;
 
-	}
+        } else {
+
+          this.controls.sending = true;
+          this.receivingView = true;
+        }
+
+        //console.log('connected to ' + id);
+
+      }).bind(this), (this.recentlyEntered_ ? 200 : 0));
+
+    }
+
+  }
 
 };
 
-/* exposed for webrtc */
 Connect.prototype.onUpdateTime = function ( data ) {
 	this.emit('onUpdateTime', data, true);
 };
@@ -254,7 +250,7 @@ Connect.prototype.onSetView = function (data) {
 	if ( this.receivingView )
 		this.controls.incoming = data.view;
 
-	this.peers[ data.sender ].incMouse = data.mouse;
+	//this.peers[ data.sender ].incMouse = data.mouse;
 };
 
 Connect.prototype.send = function (){};

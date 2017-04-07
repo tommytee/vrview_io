@@ -1,23 +1,31 @@
 module.exports = function (httpsServer, rData) {
 
-	var io = require('socket.io')(httpsServer);
+	var io = require('socket.io')(httpsServer)
+  var p2p = require('socket.io-p2p-server').Server
 
-	io.on('connection', function (socket) {
+  io.on('connection', function (socket) {
 
 		var roomCode, roomName;
 
 		console.log('new connection: ' + socket.id);
 
-		/* forwarding */
+		// forwarding
 		socket.on('broadcast', function(data){
 
-			socket.broadcast.volatile.to( roomName ).emit( data.type, data.data );
+      console.log('broadcast ' + Date.now() + ' ' + roomName)
+
+			for ( var id in rData.rooms[ roomName ].peers )
+      	if ( rData.rooms[ roomName ].peers.hasOwnProperty( id ) )
+      		if ( rData.rooms[ roomName ].peers[ id ].isIOS )
+          	socket.broadcast.volatile.to( id ).emit( data.type, data.data );
+
 		});
 
 		socket.on('send to', function(data){
 
 			socket.broadcast.to( data.id ).emit( data.type, data.data );
 		});
+
 
 		socket.on('get code', function (data) {
 
@@ -27,8 +35,9 @@ module.exports = function (httpsServer, rData) {
 			console.log('start room: ' + roomName);
 
 			socket.join( roomName );
+      p2p(socket, null, {name:roomName});
 
-			rData.rooms[ roomName ] = {
+      rData.rooms[ roomName ] = {
 				peers: {},
 				start: Date.now()
 			};
@@ -37,7 +46,7 @@ module.exports = function (httpsServer, rData) {
 
 			socket.emit('start code', { code:roomCode });
 
-		});
+    });
 
 		socket.on('enter code', function (data) {
 
@@ -51,7 +60,9 @@ module.exports = function (httpsServer, rData) {
 					console.log( 'aPeer already in room: ' + socket.id );
 				}
 
+
 				socket.join( roomName );
+        p2p(socket, null, {name:roomName});
 
 				rData.rooms[ roomName ].peers[ socket.id ] = data.info;
 
@@ -73,19 +84,6 @@ module.exports = function (httpsServer, rData) {
 
 		});
 
-		socket.on('disconnect', function () {
-
-			if ( rData.rooms[ roomName ] && rData.rooms[ roomName ].peers[ socket.id ] ) {
-
-				delete rData.rooms[roomName].peers[socket.id];
-
-				console.log('peer left ' + socket.id);
-
-				socket.broadcast.to(roomName).emit('peer left', { id: socket.id });
-
-			}
-
-		});
 
 	});
 

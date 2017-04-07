@@ -90,7 +90,9 @@ Menu.prototype.codeKeyDown = function(e) {
 
 Menu.prototype.sendCode = function () {
 
-	if ( ! this.connect.lookingForRoom_ && this.codeInput.value.length > 3 && this.codeInput.value.length < 10 ) {
+	if ( ! this.connect.lookingForRoom_ &&
+    this.codeInput.value.length > 3 &&
+    this.codeInput.value.length < 10 ) {
 
 		this.connect.lookingForRoom_ = true;
 		this.connect.lookingForContent_ = true;
@@ -129,7 +131,8 @@ Menu.prototype.showConnectionsPage = function () {
 };
 
 Menu.prototype.clickExit = function () {
-  location.reload();
+  // todo: clean disconnect
+  window.parent.location.reload();
 };
 
 Menu.prototype.getNodes = function(){
@@ -154,14 +157,26 @@ Menu.prototype.getNodes = function(){
   this.codeInput.onkeydown = this.codeKeyDown.bind(this);
   this.codeInputX.addEventListener('click', this.gotoStartPage.bind(this), false);
   this.exitButton.addEventListener('click', this.clickExit.bind(this), false);
-};
+}
+Menu.prototype.removeDevice = function(id) {
 
+  console.log('peer-disconnect --> ',id)
+
+  if ( this.connect.peers[id].deviceDiv )
+    this.connectionsPage.removeChild(this.connect.peers[id].deviceDiv);
+
+  delete this.connect.peers[ id ]
+
+};
 
 Menu.prototype.addDevice = function(id) {
 
   var userName = id.substr(0,4);
 
   console.log('peer username: ' + userName);
+
+  if ( this.connect.peers[id].deviceDiv )
+    return
 
   this.connect.peers[id].deviceDiv = document.createElement('div');
   this.connect.peers[id].deviceDiv.classList.add('device-listing');
@@ -196,7 +211,7 @@ Menu.prototype.addDevice = function(id) {
 	this.connect.peers[id].cursorDiv.classList.add('cursor-div');
 	this.connect.peers[id].cursorDiv.innerHTML = this.ICONS.cursor;
 
-  document.body.appendChild( this.connect.peers[id].cursorDiv );
+  //document.body.appendChild( this.connect.peers[id].cursorDiv );
 
 };
 
