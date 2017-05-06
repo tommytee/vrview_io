@@ -9,7 +9,6 @@ module.exports = function (httpsServer, rData) {
 
 		console.log('new connection: ' + socket.id);
 
-		// forwarding
 		socket.on('broadcast', function(data){
 
       console.log('broadcast ' + Date.now() + ' ' + roomName)

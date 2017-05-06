@@ -1,13 +1,14 @@
-This fork
+this fork...
 ==========
-This fork of VR View has many changes.
 
 Embed is served from /embed instead of / <br />
+
 Video has loop option and time. (rafa8626) <br />
 Video has scrubber/slider. <br />
-Users can connect views by getting a code and entering it into another device / browser / tab<br />
 
-uses express and socket.io
+Users can connect views by getting a code and entering it into another device / browser / tab<br />
+WebRTC is used if available. 
+uses express, socket.io, simple-peer and forked versions of socket.io-p2p and socket.io-p2p-server
 
 <https://vrview.io/examples>
 

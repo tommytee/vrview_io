@@ -9,6 +9,7 @@ THREE.VRViewControls = function ( connect, object ) {
 
 	this.connect = connect;
 	this.mouse = {};
+	var self = this;
 
 	var vrDisplay, vrDisplays;
 	var standingMatrix = new THREE.Matrix4();
@@ -83,7 +84,7 @@ THREE.VRViewControls = function ( connect, object ) {
 		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 		element.requestPointerLock();
 
-		this.pointerLock = true;
+		self.pointerLock = true;
 
 		document.addEventListener('pointerlockchange', pointerLockChange.bind(this), false);
 		document.addEventListener('mozpointerlockchange', pointerLockChange.bind(this), false);
@@ -97,7 +98,7 @@ THREE.VRViewControls = function ( connect, object ) {
 			if (document.pointerLockElement !== element &&
 				document.mozPointerLockElement !== element &&
 				document.webkitPointerLockElement !== element) {
-				this.pointerLock = false;
+				self.pointerLock = false;
 			}
 		}
 
