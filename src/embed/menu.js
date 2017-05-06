@@ -196,14 +196,16 @@ Menu.prototype.addDevice = function(id) {
 
   if ( this.connect.myInfo_.type === 'computer' && this.connect.peers[id].info.type === 'phone' ) {
 
+    var magicMouseOption = document.createElement( 'span' );
+    magicMouseOption.classList.add( 'magic-mouse-option' );
+    magicMouseOption.textContent = 'magic mouse';
+    magicMouseOption.title = 'use my mouse with this device';
+    magicMouseOption.addEventListener( 'click', this.magicMouse.bind( this, id ), false );
+
+    this.connect.peers[ id ].deviceDiv.appendChild( magicMouseOption );
+
   }
 
-  var magicMouseOption = document.createElement('span');
-  magicMouseOption.classList.add('magic-mouse-option');
-  magicMouseOption.textContent = 'magic mouse';
-  magicMouseOption.title = 'use my mouse with this device';
-  //magicMouseOption.addEventListener('click', this.magicMouse.bind(this, id), false);
-  this.connect.peers[id].deviceDiv.appendChild( magicMouseOption );
 
   this.connectionsPage.appendChild(this.connect.peers[id].deviceDiv);
 
@@ -217,11 +219,9 @@ Menu.prototype.addDevice = function(id) {
 
 Menu.prototype.magicMouse = function(id) {
 
-	if ( this.peers[id].info.type === 'computer' ) {
+  this.toggle(true);
+  this.connect.controls.enablePointerLock();
 
-	}
-	this.toggle(true);
-	this.connect.controls.enablePointerLock();
 };
 
 
